@@ -1,88 +1,78 @@
-#include "stacktype.cpp"
 #include <iostream>
+#include "quetype.cpp"
 using namespace std;
 
-int main() {
-  StackType<int> st;
-  string exp;
+int main()
+{
+    int n, amount;
 
-  cout << "Enter postfix expression: ";
-  getline(cin, exp);
+    cin >> n;
 
-  bool hasSpace = false;
-  for (int i = 0; i < exp.length(); i++) {
-    if (exp[i] == ' ') {
-      hasSpace = true;
-      break;
+    int coins[n];
+    for(int i = 0; i < n; i++)
+    {
+        cin >> coins[i];
     }
-  }
 
-  for (int i = 0; i < exp.length(); i++) {
-    char ch = exp[i];
+    cin >> amount;
 
-    if (ch == ' ')
-      continue;
+    QueType<int> q;
 
-    if (isdigit(ch)) {
-      if (hasSpace) {
-    
-        int num = 0;
-        while (i < exp.length() && isdigit(exp[i])) {
-          num = num * 10 + (exp[i] - '0');
-          i++;
-        }
-        st.Push(num);
-        i--;
-      } else {
+    bool visited[10000] = {false};
+
+    q.Enqueue(0);
+    visited[0] = true;
+
+    int count = 0;
+    bool found = false;
+
+    while(!q.IsEmpty() && !found)
+    {
+        int levelSize = 0;
+        QueType<int> q2;
+
        
-        st.Push(ch - '0');
-      }
-    } else {
-      if (st.IsEmpty()) {
-        cout << "Invalid expression" << endl;
-        return 0;
-      }
-      int val1 = st.Top();
-      st.Pop();
+        while(!q.IsEmpty())
+        {
+            int val;
+            q.Dequeue(val);
+            q2.Enqueue(val);
+            levelSize++;
+        }
 
-      if (st.IsEmpty()) {
-        cout << "Invalid expression" << endl;
-        return 0;
-      }
-      int val2 = st.Top();
-      st.Pop();
+        count++; 
 
-      int result;
+       
+        for(int i = 0; i < levelSize; i++)
+        {
+            int curr;
+            q2.Dequeue(curr);
 
-      if (ch == '+')
-        result = val2 + val1;
-      else if (ch == '-')
-        result = val2 - val1;
-      else if (ch == '*')
-        result = val2 * val1;
-      else if (ch == '/')
-        result = val2 / val1;
-      else {
-        cout << "Invalid expression" << endl;
-        return 0;
-      }
+            for(int j = 0; j < n; j++)
+            {
+                int next = curr + coins[j];
 
-      st.Push(result);
+                if(next == amount)
+                {
+                    found = true;
+                    break;
+                }
+
+                if(next < amount && !visited[next])
+                {
+                    visited[next] = true;
+                    q.Enqueue(next);
+                }
+            }
+
+            if(found) break;
+        }
     }
-  }
 
-  if (st.IsEmpty()) {
-    cout << "Invalid expression" << endl;
+    if(found)
+        cout << "Possible. Min No. of coins = " << count << endl;
+    else
+        cout << "Not possible" << endl;
+
     return 0;
-  }
-
-  int ans = st.Top();
-  st.Pop();
-
-  if (!st.IsEmpty())
-    cout << "Invalid expression" << endl;
-  else
-    cout << "Result: " << ans << endl;
-
-  return 0;
 }
